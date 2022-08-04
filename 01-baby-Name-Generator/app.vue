@@ -1,9 +1,53 @@
-<script setup>
-  const options = reactive({
-    gender: "Girl",
-    popularity: "Unique",
-    length: "Short",
+<script setup lang="ts">
+import {Gender, Popularity, Length, names} from "@/data"
+
+
+  interface OptionsState {
+    gender: Gender;
+    popularity: Popularity;
+    length: Length;
+  }
+  
+  const options: OptionsState = reactive({
+    gender: Gender.BOY,
+    popularity: Popularity.TRENDY,
+    length: Length.ALL,
   })  
+
+  const computeSelectedName = ( ) => {
+    const filterName = names
+    .filter((name) => name.gender === options.gender )
+    .filter((name) => name.popularity === options.popularity )
+    .filter((name) => {
+      if (options.length === Length.ALL){
+        return true
+      } else {
+        return name.length === options.length
+      }
+    })
+
+    selectedNames.value = filterName.map((name) => name.name)
+  }
+
+  const selectedNames = ref<string[]>([])
+
+  const optionsArray = [
+  {
+    title: "1) Choose a gender",
+    category: "gender",
+    buttons: [Gender.GIRL, Gender.UNISEX, Gender.BOY],
+  },
+  {
+    title: "2) Choose the name's popularity",
+    category: "popularity",
+    buttons: [Popularity.TRENDY, Popularity.UNIQUE],
+  },
+  {
+    title: "3) Choose name's length",
+    category: "length",
+    buttons: [Length.SHORT, Length.ALL, Length.LONG],
+  },
+];
 </script>
 
 <template>
@@ -11,34 +55,26 @@
     <h1>Baby Name Genertor</h1>
     <p>Choose your options and click the "Find Name" Button below</p>
     <div class="options-container">
-      <div class="option-container">
-        <h4>1) Choose a gender</h4>
-        <div class="option-button">
-          <button @click="options.gender = 'Boy' " :class=" options.gender === 'Boy' && 'option-active' " class="btn">Boy</button>
-          <button @click="options.gender = 'Unisex' " :class=" options.gender === 'Unisex' && 'option-active' " class="btn">Unisex</button>
-          <button @click="options.gender = 'Girl' " :class=" options.gender === 'Girl' && 'option-active' " class="btn" >Girl</button>
-        </div>
+      <Option
+        v-for="option in optionsArray"
+        :key="option.title"
+        :option="option"
+        :options="options"
+      />
+      <div>
+        <button class="primary" @click="computeSelectedName"> Find Name</button>
       </div>
-      <div class="option-container">
-        <h4>2) Choose a name's popularity</h4>
-        <div class="option-button">
-          <button  @click="options.popularity = 'Thendy' " :class=" options.popularity === 'Thendy' && 'option-active' " class="btn">Thendy</button>
-          <button  @click="options.popularity = 'Unique' " :class=" options.popularity === 'Unique' && 'option-active' " class="btn">Unique</button>
-        </div>
-      </div>
-      <div class="option-container">
-        <h4>1) Choose name length</h4>
-        <div class="option-button">
-          <button @click="options.length = 'All' " :class=" options.length === 'All' && 'option-active' " class="btn">All</button>
-          <button @click="options.length = 'Long' " :class=" options.length === 'Long' && 'option-active' " class="btn">Long</button>
-          <button @click="options.length = 'Short' " :class=" options.length === 'Short' && 'option-active' " class="btn">Short</button>
-        </div>
+    </div>
+    <div>
+      <div v-for=" name in selectedNames" :key="name.id" >
+      
+      {{ name }} <span> X </span> 
       </div>
     </div>
   </div>
 </template>
 
-<style scoped>
+<style >
 .container {
   display: flex;
   width: 50%;
@@ -112,6 +148,13 @@ h4 {
 .option-active {
   background-color: #14792a;
   color: white;
+}
+.primary {
+  background-color: #14792a;
+  color: white;
+  border-radius: 6.5rem;
+  padding: 10px;
+  border: none;
 }
 
 </style>
